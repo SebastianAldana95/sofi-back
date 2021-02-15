@@ -14,15 +14,7 @@
                         </div>
                     @endif
 
-                        <p>You are logged in!</p>
-
-                        <p>Your user data:</p>
-
-                        <pre class="p-3 bg-dark text-light">
-                        @php
-                            var_dump(Auth::user())
-                        @endphp
-                        </pre>
+                    {{ __('You are logged in!') }}
                 </div>
             </div>
         </div>

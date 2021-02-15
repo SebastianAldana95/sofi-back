@@ -3,17 +3,19 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Adldap\Laravel\Facades\Adldap;
+use LdapRecord\Auth\BindException;
+use LdapRecord\Laravel\Auth\ListensForLdapBindFailure;
+use Illuminate\Validation\ValidationException;
+use LdapRecord\Container;
+use LdapRecord\Models\ActiveDirectory\User;
 
 class LoginController extends Controller
 {
 
-    use AuthenticatesUsers;
+    use AuthenticatesUsers, ListensForLdapBindFailure;
 
     /**
      * Where to redirect users after login.
@@ -32,110 +34,56 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    protected function email()
+    public function username()
     {
-        return 'email';
+        return 'username';
     }
-    /*
-    protected function validateLogin(Request $request)
+
+    protected function credentials(Request $request)
     {
-        $this->validate($request, [
-            $this->email() => 'required|string|regex:/^[A-Za-z]+\.[A-Za-z]+$/',
-            'password' => 'required|string',
+        return [
+            'cn' => $request->get('username'),
+            'password' => $request->get('password'),
+            'fallback' => [
+              'username' => $request->get('username'),
+              'password' => $request->get('password'),
+            ],
+        ];
+    }
+
+    protected function handleLdapBindError($message, $code = null)
+    {
+        if ($code == '773') {
+            // The users password has expired. Redirect them.
+            abort(redirect('/password-reset'));
+        }
+
+        throw ValidationException::withMessages([
+            'username' => "Whoops! LDAP server cannot be reached.",
         ]);
     }
 
-    protected function attemptLogin(Request $request)
+    /*public function attemptLogin(Request $request)
     {
 
-        $credentials = $request->only($this->email(), 'password');
-        $email = $credentials[$this->email()];
-        $password = $credentials['password'];
+        $connection = Container::getDefaultConnection();
+        $user = User::findByOrFail('sAMAccountName', $request->get('username'));
 
-        $user_format = env('LDAP_USER_FORMAT');
-        $userdn = sprintf($user_format, $email);
-
-        if (Adldap::auth()->attempt($userdn, $password, $bindAsUser = true)) {
-
-            $user = User::where($this->username(), $email)->first();
-
-            if (!$user) {
-
-                $user = new User();
-                $user->email = $email;
-                $user->password = '';
-
-                $sync_attrs = $this->retrieveSyncAttributes($email);
-                foreach ($sync_attrs as $field => $value) {
-                    $user->$field = $value !== null ? $value : '';
-                }
+        try {
+            if ($connection->auth()->attempt($user->getDn(), $request->password, $stayBound = true)) {
+                return view('home')->with([
+                    'message' => 'Credenciales correctas',
+                    'data' => $user,
+                ]);
             }
 
-            $this->guard()->login($user, true);
-            return true;
+
+        } catch (BindException $e) {
+            $error = $e->getDetailedError();
+
+            echo $error->getErrorCode();
+            echo $error->getErrorMessage();
+            echo $error->getDiagnosticMessage();
         }
-        // the user doesn't exist in the LDAP server or the password is wrong
-        // log error
-        return false;
-    }
-
-    protected function retrieveSyncAttributes($email)
-    {
-        $ldapuser = Adldap::search()->where(env('LDAP_USER_ATTRIBUTE'), '=', $email)->first();
-
-        if (!$ldapuser) {
-            // log error
-            return false;
-        }
-
-        $ldapuser_attrs = null;
-
-        $attrs = [];
-
-        foreach (config('ldap_auth.sync_attributes') as $local_attr => $ldap_attr) {
-            if ($local_attr == 'email') {
-                continue;
-            }
-
-            $method = 'get' . $ldap_attr;
-            if (method_exists($ldapuser, $method)) {
-                $attrs[$local_attr] = $ldapuser->$method();
-                continue;
-            }
-
-            if ($ldapuser_attrs === null) {
-                $ldapuser_attrs = self::accessProtected($ldapuser, 'attributes');
-            }
-
-            if (!isset($ldapuser_attrs[$ldap_attr])) {
-                // an exception could be thrown
-                $attrs[$local_attr] = null;
-                continue;
-            }
-
-            if (!is_array($ldapuser_attrs[$ldap_attr])) {
-                $attrs[$local_attr] = $ldapuser_attrs[$ldap_attr];
-            }
-
-            if (count($ldapuser_attrs[$ldap_attr]) == 0) {
-                // an exception could be thrown
-                $attrs[$local_attr] = null;
-                continue;
-            }
-
-            $attrs[$local_attr] = $ldapuser_attrs[$ldap_attr][0];
-            //$attrs[$local_attr] = implode(',', $ldapuser_attrs[$ldap_attr]);
-        }
-
-        return $attrs;
-    }
-
-    protected static function accessProtected($obj, $prop)
-    {
-        $reflection = new \ReflectionClass($obj);
-        $property = $reflection->getProperty($prop);
-        $property->setAccessible(true);
-        return $property->getValue($obj);
     }*/
-
 }

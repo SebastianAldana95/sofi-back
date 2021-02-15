@@ -2,35 +2,28 @@
 
 return [
 
-    'logging' => env('LDAP_LOGGING', false),
+    'default' => env('LDAP_CONNECTION', 'default'),
 
     'connections' => [
 
         'default' => [
-
-            'auto_connect' => env('LDAP_AUTO_CONNECT', true),
-
-            'connection' => Adldap\Connections\Ldap::class,
-
-            'settings' => [
-
-                'schema' => Adldap\Schemas\OpenLDAP::class,
-                'account_prefix' => env('LDAP_ACCOUNT_PREFIX', ''),
-                'account_suffix' => env('LDAP_ACCOUNT_SUFFIX', ''),
-                'hosts' => explode(' ', env('LDAP_HOSTS', '10.1.7.215')),
-                'port' => env('LDAP_PORT', 389),
-                'timeout' => env('LDAP_TIMEOUT', 5),
-                'base_dn' => env('LDAP_BASE_DN', 'dc=fiscalia,dc=col'),
-                'username' => env('LDAP_USERNAME', ''),
-                'password' => env('LDAP_PASSWORD', ''),
-                'follow_referrals' => false,
-                'use_ssl' => env('LDAP_USE_SSL', false),
-                'use_tls' => env('LDAP_USE_TLS', false),
-
-            ],
-
+            'hosts' => [env('LDAP_HOST', '10.1.7.215')],
+            'username' => env('LDAP_USERNAME', ''),
+            'password' => env('LDAP_PASSWORD', ''),
+            'port' => env('LDAP_PORT', 389),
+            'base_dn' => env('LDAP_BASE_DN', 'dc=fiscalia,dc=col'),
+            'timeout' => env('LDAP_TIMEOUT', 5),
+            'use_ssl' => env('LDAP_SSL', false),
+            'use_tls' => env('LDAP_TLS', false),
         ],
 
+    ],
+
+    'logging' => env('LDAP_LOGGING', true),
+
+    'cache' => [
+        'enabled' => env('LDAP_CACHE', false),
+        'driver' => env('CACHE_DRIVER', 'file'),
     ],
 
 ];
