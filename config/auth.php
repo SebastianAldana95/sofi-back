@@ -36,7 +36,7 @@ return [
             ],
             'database' => [
                 'model' => App\Models\User::class,
-                'sync_passwords' => false,
+                'sync_passwords' => true,
                 'sync_attributes' => [
                     //App\Ldap\AttributeHandler::class,
                     'username' => 'sAMAccountName',
@@ -45,8 +45,6 @@ return [
                     'email' => 'userPrincipalName',
                     'phone' => 'mobile',
                     'type' => 'employeeType',
-                    'guid' => 'objectGUID',
-                    'password' => false,
                 ],
                 'sync_existing' => [
                     'name' => 'cn',
