@@ -37,7 +37,28 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            'root' => storage_path('app/public/'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
+        'photo' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
+        'event' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
+        'article' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],

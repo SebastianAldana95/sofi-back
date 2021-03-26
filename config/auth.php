@@ -14,20 +14,16 @@ return [
             'provider' => 'ldap',
         ],
 
-        /*'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],*/
-
         'api' => [
-            'driver' => 'token',
-            'provider' => 'users',
+            'driver' => 'passport',
+            'provider' => 'ldap',
             'hash' => false,
         ],
     ],
 
 
     'providers' => [
+        // change ldap
         'ldap' => [
             'driver' => 'ldap',
             'model' => LdapRecord\Models\ActiveDirectory\User::class,
@@ -39,29 +35,24 @@ return [
                 'sync_passwords' => true,
                 'sync_attributes' => [
                     //App\Ldap\AttributeHandler::class,
+                    'identification' => 'description',
                     'username' => 'sAMAccountName',
-                    'name' => 'cn',
+                    'name' => 'givenName',
                     'lastname' => 'sn',
-                    'email' => 'userPrincipalName',
-                    'phone' => 'mobile',
-                    'type' => 'employeeType',
+                    'email' => 'mail',
+                    'title' => 'title',
+                    'institution' => 'physicalDeliveryOfficeName',
+                    'phone1' => 'telephoneNumber',
+                    'phone2' => 'mobile',
+                    'address' => 'streetAddress',
+                    'alternatename' => 'displayName',
+                    'city' => 'l',
                 ],
                 'sync_existing' => [
-                    'name' => 'cn',
+                    'username' => 'sAMAccountName',
                 ],
             ],
         ],
-
-        //'users' => [
-        //    'driver' => 'eloquent', ldpa -> opcional
-        //    'model' => App\Models\User::class,
-        //],
-
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     'passwords' => [

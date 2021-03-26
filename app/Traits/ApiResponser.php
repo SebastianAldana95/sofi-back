@@ -1,12 +1,14 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: ricar
+ * UsersController: ricar
  * Date: 26/03/2019
  * Time: 1:29 PM
  */
 namespace App\Traits;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Cache;
 
@@ -16,6 +18,7 @@ trait ApiResponser
     {
         return response()->json($data, $code);
     }
+
     protected function errorResponse($message, $code = 422)
     {
         return response()->json([
@@ -58,4 +61,15 @@ trait ApiResponser
             return $data;
         });
     }
+
+    protected function showAll(Collection $collection, $code = 200)
+    {
+        return $this->success(['data' => $collection], 200);
+    }
+
+    protected function showOne(Model $instance, $code = 200)
+    {
+        return $this->success(['data' => $instance], 200);
+    }
+
 }

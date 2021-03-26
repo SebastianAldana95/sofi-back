@@ -4,18 +4,33 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Http\Request;
-use LdapRecord\Auth\BindException;
-use LdapRecord\Laravel\Auth\ListensForLdapBindFailure;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use LdapRecord\Container;
-use LdapRecord\Models\ActiveDirectory\User;
+
+use App\Models\Passport\Authenticator as PassportAuthenticator;
+use App\Models\Passport\PassportClient;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Laravel\Passport\Passport;
+use Psr\Http\Message\ServerRequestInterface;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | Login Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller handles authenticating users for the application and
+    | redirecting them to your home screen. The controller uses a trait
+    | to conveniently provide its functionality to your applications.
+    |
+    */
 
-    use AuthenticatesUsers, ListensForLdapBindFailure;
+    use AuthenticatesUsers;
 
     /**
      * Where to redirect users after login.
@@ -39,16 +54,65 @@ class LoginController extends Controller
         return 'username';
     }
 
-    protected function credentials(Request $request)
+    public function password()
     {
-        return [
-            'sAMAccountName' => $request->get('username'),
-            'password' => $request->get('password'),
-            'fallback' => [
-              'username' => $request->get('username'),
-              'password' => $request->get('password'),
-            ],
-        ];
+        return 'password';
+    }
+
+    public function login(ServerRequestInterface $request, Request $login): JsonResponse
+    {
+
+        // Attempt logging in with ldap auth provider
+        if (!Auth::attempt(['sAMAccountName' => $login['username'], 'password' => $login['password']])){
+            return response()->json(['error' => 'Las credenciales proporcionadas no coinciden con nuestros registros'], 401);
+        }
+
+        // get the passport client using the API key passed in the request header
+        if (!request()->header('apiKey')){
+            return response()->json(["error" => "Su cliente no puede acceder a esta aplicación"], 401);
+        }
+
+        $user = Auth::user();
+        /*if ($login->remember_token) {
+            Passport::personalAccessTokensExpireIn(now()->addMinutes(3));
+        }*/
+        $tokenResult = $user->createToken('sofiApp');
+        $token = $tokenResult->token;
+        $token->save();
+
+        return response()->json([
+            'access_token' => $tokenResult->accessToken,
+            'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
+            'token_type' => 'Bearer',
+        ], 200);
+
+        /*
+        // generate passport tokens
+        $client = PassportClient::findClientBySecret(request()->header('apikey'));
+
+        $passport = (new PassportAuthenticator($request))
+            ->authenticate($client, request('username'), request('password'));
+
+        return response()->json([
+            "access_token" => $passport->accessToken,
+            "expires_in" => $passport->expires_in,
+            "refresh_token" => $passport->refresh_token,
+        ], 200);*/
+
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->token()->revoke();
+        return response()->json([
+                'message' => 'Successfully logged out'
+        ]);
+
+    }
+
+    public function user(Request $request): JsonResponse
+    {
+        return response()->json($request->user());
     }
 
     protected function handleLdapBindError($message, $code = null)
@@ -63,27 +127,5 @@ class LoginController extends Controller
         ]);
     }
 
-    /*public function attemptLogin(Request $request)
-    {
 
-        $connection = Container::getDefaultConnection();
-        $user = User::findByOrFail('sAMAccountName', $request->get('username'));
-
-        try {
-            if ($connection->auth()->attempt($user->getDn(), $request->password, $stayBound = true)) {
-                return view('home')->with([
-                    'message' => 'Credenciales correctas',
-                    'data' => $user,
-                ]);
-            }
-
-
-        } catch (BindException $e) {
-            $error = $e->getDetailedError();
-
-            echo $error->getErrorCode();
-            echo $error->getErrorMessage();
-            echo $error->getDiagnosticMessage();
-        }
-    }*/
 }

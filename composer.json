@@ -10,15 +10,22 @@
     "require": {
         "php": "^7.3|^8.0",
         "ext-ldap": "*",
+        "barryvdh/laravel-ide-helper": "^2.0",
         "directorytree/ldaprecord": "^2.1",
         "directorytree/ldaprecord-laravel": "^2.1",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "jeroennoten/laravel-adminlte": "^3.5",
         "laravel/framework": "^8.12",
+        "laravel/passport": "^10.1",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.2",
-        "yajra/laravel-oci8": "8.2.*"
+        "laraveles/spanish": "^1.5",
+        "livewire/livewire": "^2.3",
+        "yajra/laravel-oci8": "8.2.*",
+        "zendframework/zend-httphandlerrunner": "^1.1",
+        "ext-json": "*"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

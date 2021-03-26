@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
@@ -15,16 +16,10 @@ use App\Http\Controllers\Auth\LoginController;
 |
 */
 
+/*
 Route::get('/', function () {
     return view('auth.login');
 });
-
-// Route::post('/login', [App\Http\Controllers\LdapController::class, 'ad_login']);
-
-/*Route::get('/dash', function (){
-    return view('dash.index');
-});*/
-
 
 Auth::routes([
     'reset' => false,
@@ -33,3 +28,25 @@ Auth::routes([
 ]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::resource('users', UserController::class,  ['except' => 'show'])->middleware(['auth']);
+*/
+
+
+
+/*Route::group(['middleware' => 'auth'], function (){
+    // Route::get('/users', [UserController::class, 'index']);
+    // Route::post('/users/register', [UserController::class, 'store']);
+    // Route::put('/users/update', [UserController::class, 'update']);
+    // Route::put('/users/enable', [UserController::class, 'enable']);
+    // Route::put('/users/disable', [UserController::class, 'disable']);
+    // Route::put('/users/delete', [UserController::class, 'destroy']);
+});*/
+
+// Route::view('userList', 'livewire.usuarios.component');
+
+
+
+
+
+
