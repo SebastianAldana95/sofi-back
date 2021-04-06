@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Passport\PassportClient;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-use App\Models\Passport\Authenticator as PassportAuthenticator;
-use App\Models\Passport\PassportClient;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Laravel\Passport\Passport;
-use Psr\Http\Message\ServerRequestInterface;
 use Illuminate\Http\Request;
+
 
 class LoginController extends Controller
 {
@@ -59,45 +58,42 @@ class LoginController extends Controller
         return 'password';
     }
 
-    public function login(ServerRequestInterface $request, Request $login): JsonResponse
+    public function login(Request $login): JsonResponse
     {
 
-        // Attempt logging in with ldap auth provider
-        if (!Auth::attempt(['sAMAccountName' => $login['username'], 'password' => $login['password']])){
-            return response()->json(['error' => 'Las credenciales proporcionadas no coinciden con nuestros registros'], 401);
-        }
+        $validations = [
+            'username' => 'required',
+            'password' => 'required'
+        ];
 
-        // get the passport client using the API key passed in the request header
-        if (!request()->header('apiKey')){
-            return response()->json(["error" => "Su cliente no puede acceder a esta aplicación"], 401);
-        }
+        $this->validate($login, $validations);
 
-        $user = Auth::user();
-        /*if ($login->remember_token) {
-            Passport::personalAccessTokensExpireIn(now()->addMinutes(3));
-        }*/
-        $tokenResult = $user->createToken('sofiApp');
-        $token = $tokenResult->token;
-        $token->save();
+        $user = User::where('username', $login['username'])->first();
+        if ($user) {
+            if (Hash::check($login['password'], $user->password)) {
+                $tokenResult = $user->createToken('sofiApp');
+                $token = $tokenResult->token;
+                $token->save();
+            } else {
+                return response()->json(["error" => "Usuario o contraseña no coinciden! Intente nuevamente."], 401);
+            }
+        } else {
+            // Attempt logging in with ldap auth provider
+            if (!Auth::attempt(['sAMAccountName' => $login['username'], 'password' => $login['password']])) {
+                return response()->json(["error" => "Las credenciales proporcionadas no fueron encontradas"], 401);
+            }
+            $user = Auth::user();
+            $tokenResult = $user->createToken('sofiApp');
+            $token = $tokenResult->token;
+            $token->save();
+        }
 
         return response()->json([
             'access_token' => $tokenResult->accessToken,
             'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
             'token_type' => 'Bearer',
-        ], 200);
+        ]);
 
-        /*
-        // generate passport tokens
-        $client = PassportClient::findClientBySecret(request()->header('apikey'));
-
-        $passport = (new PassportAuthenticator($request))
-            ->authenticate($client, request('username'), request('password'));
-
-        return response()->json([
-            "access_token" => $passport->accessToken,
-            "expires_in" => $passport->expires_in,
-            "refresh_token" => $passport->refresh_token,
-        ], 200);*/
 
     }
 

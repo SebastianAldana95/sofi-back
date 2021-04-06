@@ -11,12 +11,12 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'ldap',
+            'provider' => 'users',
         ],
 
         'api' => [
             'driver' => 'passport',
-            'provider' => 'ldap',
+            'provider' => 'users',
             'hash' => false,
         ],
     ],
@@ -24,7 +24,7 @@ return [
 
     'providers' => [
         // change ldap
-        'ldap' => [
+        'users' => [
             'driver' => 'ldap',
             'model' => LdapRecord\Models\ActiveDirectory\User::class,
             'rules' => [

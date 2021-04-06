@@ -2,10 +2,11 @@
 
 namespace App\Models\Passport;
 
+use App\Models\User;
 use Laravel\Passport\Http\Controllers\HandlesOAuthErrors;
 use Laravel\Passport\TokenRepository;
 use Lcobucci\JWT\Parser as JwtParser;
-use League\OAuth2\Server\AuthorizationServer;
+use League\OAuth2\Server\AuthorizationServer as AuthorizationServer;
 use Nyholm\Psr7\Response as Psr7Response;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -40,8 +41,7 @@ class Authenticator
             return $this->convertResponse($this->server->respondToAccessTokenRequest($request, new Psr7Response));
         })->content();
 
-        return json_decode((string) $response->getBody(), true)['access_token'];
-        //return json_decode($response);
+        return json_decode($response);
 
     }
 
