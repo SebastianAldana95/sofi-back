@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
 use LdapRecord\Laravel\Auth\HasLdapUser;
@@ -64,16 +65,9 @@ class User extends Authenticatable implements LdapAuthenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function adminlte_image(){
-        return 'https://picsum.photos/300/300';
-    }
-
-    public function adminlte_desc(){
-        return auth()->user()->email;
-    }
-
-    public function adminlte_profile_url(){
-        return 'profile/username';
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
     }
 
     public function events() {

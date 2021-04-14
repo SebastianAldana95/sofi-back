@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Passport\PassportClient;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Carbon\Carbon;
@@ -70,6 +69,9 @@ class LoginController extends Controller
 
         $user = User::where('username', $login['username'])->first();
         if ($user) {
+            if ($user->state != 'activo') {
+                return response()->json(["error" => "Usuario pendiente o inactivo"], 403);
+            }
             if (Hash::check($login['password'], $user->password)) {
                 $tokenResult = $user->createToken('sofiApp');
                 $token = $tokenResult->token;

@@ -17,8 +17,12 @@ class CreateEventUserTable extends Migration
             $table->integer('event_id')->unsigned();
             $table->integer('user_id')->unsigned();
 
-            $table->foreign('event_id')->references('id')->on('events');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('event_id')->references('id')
+                ->on('events')
+                ->onDelete('cascade');
+            $table->foreign('user_id')->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 

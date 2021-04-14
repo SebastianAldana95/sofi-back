@@ -20,7 +20,9 @@ class CreateNotificationsTable extends Migration
             $table->dateTime('date');
             $table->string('details');
 
-            $table->foreign('event_id')->references('id')->on('events');
+            $table->foreign('event_id')->references('id')
+                ->on('events')
+                ->onDelete('cascade');
 
             $table->timestamps();
         });

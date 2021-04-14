@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Api\ApiController;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 
 class UserController extends ApiController
@@ -21,46 +25,31 @@ class UserController extends ApiController
      */
     public function index(): JsonResponse
     {
-        $users = User::all();
-        return $this->showAll($users);
-
+        return $this->collectionResponse(UserResource::collection($this->getModel(new User, ['favorites'])));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param StoreUserRequest $request
      * @return JsonResponse
-     * @throws ValidationException
+     * @throws Throwable
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
-        $validations = [
-            'identification' => 'required|integer',
-            'username' => 'required|string|unique:users',
-            'name' => 'required|string',
-            'lastname' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'title' => 'required|string',
-            'institution' => 'required|string',
-            'phone1' => 'required|string',
-            'phone2' => 'required|string',
-            'address' => 'required|string',
-            'alternatename' => 'required|string',
-            'password' => 'required',
-            'photo' => 'image|mimes:jpg,png,jpeg,gif,svg|max:2048'
+        $user = new User;
+        $user->fill($request->all());
+        $user->user = 'manual';
+        $user->state = 'pendiente';
+        $user->saveOrFail();
 
-        ];
+        // Mail de bienvenida!
 
-        $this->validate($request, $validations);
-        $userRequest = $request->all();
-        $userRequest['password'] = bcrypt($request['password']);
-        $userRequest['state'] = 1;
-        $userRequest['user'] = 'manual';
-        $userRequest['photo'] = $request->photo->store('photos', 'photo');
-
-        $user = User::query()->create($userRequest);
-        return $this->showOne($user, 201);
+        return $this->api_success([
+            'data' => new UserResource($user),
+            'message' => __('pages.responses.created'),
+            'code' => 201
+        ], 201);
     }
 
     /**
@@ -71,8 +60,7 @@ class UserController extends ApiController
      */
     public function show(User $user): JsonResponse
     {
-        $user->events;
-        return $this->showOne($user);
+        return $this->singleResponse(new UserResource($user));
     }
 
     /**
@@ -83,21 +71,16 @@ class UserController extends ApiController
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function update(Request $request, User $user): JsonResponse
+    public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
-        $validations = [
-            'username' => 'string|unique:users',
-            'email' => 'email|unique:users',
-            'password' => 'min:8|confirmed',
-            'photo' => 'image|dimensions:min_width=200,min_height=200',
-
-        ];
-
-        $this->validate($request, $validations);
         if ($user->user === 'ldap') {
             if ($request->has('photo')) {
                 Storage::disk('photo')->delete($user->photo);
                 $user->photo = $request->photo->store('photos', 'photo');
+            }
+
+            if ($request->has('state')) {
+                $user->state = $request->state;
             }
         } elseif ($user->user === 'manual') {
             if ($request->has('identification')) {
@@ -188,7 +171,11 @@ class UserController extends ApiController
 
         $user->save();
 
-        return $this->showOne($user);
+        return $this->api_success([
+            'data'      =>  new UserResource($user),
+            'message'   => __('pages.responses.updated'),
+            'code'      =>  201
+        ], 201);
 
     }
 
@@ -203,7 +190,11 @@ class UserController extends ApiController
     {
         Storage::disk('photo')->delete($user->photo);
         $user->delete();
-        return $this->showOne($user);
+        return $this->api_success([
+            'data'      =>  new UserResource($user),
+            'message'   => __('pages.responses.deleted'),
+            'code'      =>  200
+        ]);
     }
 
     /**
@@ -214,9 +205,9 @@ class UserController extends ApiController
      */
     public function enable(User $user): JsonResponse
     {
-        $user->state = 1;
+        $user->state = 'activo';
         $user->save();
-        return $this->showOne($user);
+        return $this->singleResponse(new UserResource($user));
     }
 
     /**
@@ -227,8 +218,8 @@ class UserController extends ApiController
      */
     public function disable(User $user): JsonResponse
     {
-        $user->state = 0;
+        $user->state = 'inactivo';
         $user->save();
-        return $this->showOne($user);
+        return $this->singleResponse(new UserResource($user));
     }
 }

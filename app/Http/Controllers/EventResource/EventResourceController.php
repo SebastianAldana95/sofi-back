@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\EventResource;
 
-use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Api\ApiController;
+use App\Http\Requests\StoreEventResourceRequest;
+use App\Http\Resources\EventResourceResource;
 use App\Models\EventResource;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class EventResourceController extends ApiController
 {
@@ -19,31 +21,30 @@ class EventResourceController extends ApiController
      */
     public function index(): JsonResponse
     {
-        $resources = EventResource::all();
-        return $this->showAll($resources);
+        return $this->collectionResponse(EventResourceResource::collection($this->getModel(new EventResource, [])));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param StoreEventResourceRequest $request
      * @return JsonResponse
-     * @throws ValidationException
+     * @throws Throwable
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreEventResourceRequest $request): JsonResponse
     {
-        $validations = [
-            'type' => 'required',
-            'url' => 'required|image|dimensions:min_width=200, min_height=200',
-            'event_id' => 'required|integer',
-        ];
+        $eventResource = new EventResource;
+        $eventResource->fill($request->all());
 
-        $this->validate($request, $validations);
-        $eventResourceRequest = $request->all();
-        $eventResourceRequest['url'] = $request->url->store('events', 'event');
-
-        $eventResource = EventResource::query()->create($eventResourceRequest);
-        return $this->showOne($eventResource, 201);
+        if ($request->hasFile('url')) {
+            $eventResource->url = $request->url->store('/', 'event');
+        }
+        $eventResource->saveOrFail();
+        return $this->api_success([
+            'data' => new EventResourceResource($eventResource),
+            'message' => __('pages.responses.created'),
+            'code' => 201
+        ], 201);
     }
 
     /**
@@ -54,7 +55,7 @@ class EventResourceController extends ApiController
      */
     public function show(EventResource $eventResource): JsonResponse
     {
-        return $this->showOne($eventResource);
+        return $this->singleResponse(new EventResourceResource($eventResource));
     }
 
     /**
@@ -66,23 +67,26 @@ class EventResourceController extends ApiController
      */
     public function update(Request $request, EventResource $eventResource): JsonResponse
     {
-        $eventResource->fill($request->only([
-            'type',
-            'url',
-            'event_id',
-        ]));
+        if ($request->has('type')) {
+            $eventResource->type = $request->type;
+        }
 
         if ($request->hasFile('url')) {
             Storage::disk('event')->delete($eventResource->url);
-            $eventResource->url = $request->url->store('events', 'event');
+            $eventResource->url = $request->url->store('/', 'event');
         }
 
-        if ($eventResource->isClean()) {
-            return $this->errorResponse('Se debe especificar al menos un valor diferente para actualizar', 422);
+        if (!$eventResource->isDirty()) {
+            return $this->errorResponse(
+                'Se debe especificar al menos un valor diferente para actualizar',
+            );
         }
-
-        $eventResource->save();
-        return $this->showOne($eventResource);
+        $eventResource->saveOrFail();
+        return $this->api_success([
+            'data' => new EventResourceResource($eventResource),
+            'message' =>  __('pages.responses.updated'),
+            'code' => 200
+        ]);
     }
 
     /**
@@ -96,6 +100,6 @@ class EventResourceController extends ApiController
     {
         Storage::disk('event')->delete($eventResource->url);
         $eventResource->delete();
-        return $this->showOne($eventResource);
+        return $this->singleResponse(new EventResourceResource($eventResource));
     }
 }

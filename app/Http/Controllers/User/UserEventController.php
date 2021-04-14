@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Facade\FlareClient\Api;
@@ -19,6 +19,9 @@ class UserEventController extends ApiController
      */
     public function index(User $user): JsonResponse
     {
+        /*$events = $user->events()->with(['resources', 'notifications' => function($query) {
+          return $query->orderBy('resources.order');
+        }]);*/
         $events = $user->events;
         return $this->showAll($events);
     }

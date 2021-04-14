@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Notification;
 
-use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Api\ApiController;
+use App\Http\Requests\StoreNotificationRequest;
+use App\Http\Requests\UpdateNotificationRequest;
+use App\Http\Resources\NotificationResource;
 use App\Models\Notification;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class NotificationController extends ApiController
 {
@@ -18,28 +20,26 @@ class NotificationController extends ApiController
      */
     public function index(): JsonResponse
     {
-        $notifications = Notification::all();
-        return $this->showAll($notifications);
+        return $this->collectionResponse(NotificationResource::collection($this->getModel(new Notification, [])));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param StoreNotificationRequest $request
      * @return JsonResponse
-     * @throws ValidationException
+     * @throws Throwable
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreNotificationRequest $request): JsonResponse
     {
-        $validations = [
-            'date' => 'required|date',
-            'details' => 'required|string',
-            'event_id' => 'required|integer',
-        ];
-
-        $this->validate($request, $validations);
-        $notification = Notification::query()->create($request->all());
-        return $this->showOne($notification, 201);
+        $notification = new Notification;
+        $notification->fill($request->all());
+        $notification->saveOrFail();
+        return $this->api_success([
+            'data' => new NotificationResource($notification),
+            'message' => __('pages.responses.created'),
+            'code' => 201
+        ], 201);
     }
 
     /**
@@ -50,29 +50,39 @@ class NotificationController extends ApiController
      */
     public function show(Notification $notification): JsonResponse
     {
-        return $this->showOne($notification);
+        return $this->singleResponse(new NotificationResource($notification));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
+     * @param UpdateNotificationRequest $request
      * @param Notification $notification
      * @return JsonResponse
+     * @throws Throwable
      */
-    public function update(Request $request, Notification $notification): JsonResponse
+    public function update(UpdateNotificationRequest $request, Notification $notification): JsonResponse
     {
-        $notification->fill($request->only([
-            'date',
-            'details',
-            'event_id',
-        ]));
 
-        if ($notification->isClean()) {
-            return $this->errorResponse('Se debe especificar al menos un valor diferente para actualizar');
+        if ($request->has('date')) {
+            $notification->date = $request->date;
         }
-        $notification->save();
-        return $this->showOne($notification);
+
+        if ($request->has('details')) {
+            $notification->details = $request->details;
+        }
+
+        if (!$notification->isDirty()) {
+            return $this->errorResponse(
+                'Se debe especificar al menos un valor diferente para actualizar',
+            );
+        }
+        $notification->saveOrFail();
+        return $this->api_success([
+            'data'      =>  new NotificationResource($notification),
+            'message'   => __('pages.responses.updated'),
+            'code'      =>  200
+        ]);
     }
 
     /**
@@ -85,6 +95,10 @@ class NotificationController extends ApiController
     public function destroy(Notification $notification): JsonResponse
     {
         $notification->delete();
-        return $this->showOne($notification);
+        return $this->api_success([
+            'data' => new NotificationResource($notification),
+            'message' => __('pages.responses.deleted'),
+            'code' => 200
+        ]);
     }
 }

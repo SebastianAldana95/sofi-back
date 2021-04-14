@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\user\UserController;
 
 /*
 |----------5----------------------------------------------------------------
@@ -18,15 +17,18 @@ use App\Http\Controllers\user\UserController;
 
 Route::post('/login', [LoginController::class, 'login']);
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::group(['middleware' => 'auth:api'], function () {
+    /*
+     *  Auth User
+     * */
     Route::get('/logout', [LoginController::class, 'logout']);
+    Route::get('user', function (Request $request) {
+        return $request->user()->load(['roles', 'favorites']);
+    });
     /*
      *  Users
      * */
+
     Route::resource('users', App\Http\Controllers\User\UserController::class, ['except' => ['create', 'edit']]);
     Route::resource('users.events', App\Http\Controllers\User\UserEventController::class, ['only' => ['index']]);
     Route::resource('users.favorites', App\Http\Controllers\User\UserFavoriteController::class, ['except' => ['create', 'edit', 'show']]);
@@ -36,7 +38,7 @@ Route::group(['middleware' => 'auth:api'], function () {
      * */
     Route::resource('events', App\Http\Controllers\Event\EventController::class, ['except' => ['create', 'edit']]);
     Route::resource('events.notifications', App\Http\Controllers\Event\EventNotificationController::class, ['only' => ['index']]);
-    Route::resource('events.users', App\Http\Controllers\Event\EventUserController::class, ['only' => ['index']]);
+    Route::resource('events.resources', App\Http\Controllers\Event\EventResourceController::class, ['only' => ['index']]);
     /*
      *  Events Resources
      * */

@@ -20,7 +20,9 @@ class CreateEventResourcesTable extends Migration
             $table->string('type', 20);
             $table->string('url');
 
-            $table->foreign('event_id')->references('id')->on('events');
+            $table->foreign('event_id')->references('id')
+                ->on('events')
+                ->onDelete('cascade');
 
             $table->timestamps();
         });
