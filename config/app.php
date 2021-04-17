@@ -176,6 +176,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        /* Cors */
+        \Fruitcake\Cors\CorsServiceProvider::class,
+
         /*  Helper */
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
 
