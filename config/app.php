@@ -179,6 +179,8 @@ return [
         /*  Helper */
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
 
+        /*  Spatie/Laravel-Permissions */
+        Spatie\Permission\PermissionServiceProvider::class,
 
     ],
 

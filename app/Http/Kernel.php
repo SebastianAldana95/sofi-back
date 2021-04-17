@@ -65,5 +65,10 @@ class Kernel extends HttpKernel
 
         // passport middleware
         'client-credentials' => \Laravel\Passport\Http\Middleware\CheckClientCredentials::class,
+
+        // role and permissions
+        'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
+
     ];
 }

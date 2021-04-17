@@ -19,6 +19,12 @@ use Illuminate\Validation\ValidationException;
 
 class EventController extends ApiController
 {
+
+    public function __construct()
+    {
+        parent::__construct();
+
+    }
     /**
      * Display a listing of the resource.
      *

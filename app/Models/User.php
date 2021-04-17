@@ -10,11 +10,12 @@ use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
 use LdapRecord\Laravel\Auth\HasLdapUser;
 use Laravel\Passport\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 
 class User extends Authenticatable implements LdapAuthenticatable
 {
-    use Notifiable, AuthenticatesWithLdap, HasLdapUser, HasApiTokens, HasFactory;
+    use Notifiable, AuthenticatesWithLdap, HasLdapUser, HasApiTokens, HasFactory, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -65,17 +66,15 @@ class User extends Authenticatable implements LdapAuthenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected $guard_name = 'api';
+
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::make($value);
     }
 
     public function events() {
-        return $this->belongsToMany('\App\Models\Event', 'event_user')
-            ->where('visibility', '=', '1')
-            ->with('resources', 'notifications')
-            ->latest('start_date');
-
+        return $this->belongsToMany('\App\Models\Event', 'event_user');
     }
 
     public function favorites() {

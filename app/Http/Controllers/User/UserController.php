@@ -18,6 +18,14 @@ use Throwable;
 class UserController extends ApiController
 {
 
+    public function __construct()
+    {
+        parent::__construct();
+
+        // $this->middleware('role:user')->except(['edit', 'create']);
+
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -25,7 +33,7 @@ class UserController extends ApiController
      */
     public function index(): JsonResponse
     {
-        return $this->collectionResponse(UserResource::collection($this->getModel(new User, ['favorites'])));
+        return $this->collectionResponse(UserResource::collection($this->getModel(new User, ['roles'])));
     }
 
     /**
@@ -41,6 +49,7 @@ class UserController extends ApiController
         $user->fill($request->all());
         $user->user = 'manual';
         $user->state = 'pendiente';
+        $user->syncRoles('User');
         $user->saveOrFail();
 
         // Mail de bienvenida!
@@ -60,6 +69,7 @@ class UserController extends ApiController
      */
     public function show(User $user): JsonResponse
     {
+        $user->roles;
         return $this->singleResponse(new UserResource($user));
     }
 
@@ -165,9 +175,13 @@ class UserController extends ApiController
             }
         }
 
-        if (!$user->isDirty()) {
-            return $this->errorResponse('Se debe especificar al menos un valor diferente para actualizar', 409);
+        if ($request->has('roles')) {
+            $user->syncRoles($request->roles);
         }
+
+        /*if (!$user->isDirty()) {
+            return $this->errorResponse('Se debe especificar al menos un valor diferente para actualizar', 409);
+        }*/
 
         $user->save();
 

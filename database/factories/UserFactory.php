@@ -24,21 +24,13 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'identification' => '576874545',
+            'identification' => '123456789',
             'username' => 'admin',
-            'name' => 'administrador',
+            'name' => 'admin',
             'lastname' => 'admin',
-            'email' => 'administrador@admin.com',
-            'title' => 'administrador',
-            'institution' => 'administrador',
-            'phone1' => 'phone admin 1',
-            'phone2' => 'phone admin 1',
-            'address' => 'Colombia',
-            'alternatename' => 'administrador',
+            'email' => 'admin@admin.com',
             'user' => 'manual',
-            'email_verified_at' => now(),
             'password' => Hash::make('password12345'),
-            'remember_token' => Str::random(10),
         ];
     }
 }

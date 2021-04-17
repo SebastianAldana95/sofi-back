@@ -31,7 +31,7 @@ class CreateUsersTable extends Migration
             $table->string('firstnamephonetic',120)->nullable();
             $table->string('lastnamephonetic',120)->nullable();
             $table->string('middlename',120)->nullable();
-            $table->string('photo',120)->default('storage/photos/default.jpg')->nullable();
+            $table->string('photo',120)->default('/photos/default.jpg')->nullable();
             $table->string('state')->default('activo')->nullable();
             $table->string('user')->default('ldap')->nullable();
             $table->string('city')->default('BOGOTÁ')->nullable();

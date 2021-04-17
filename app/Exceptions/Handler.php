@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -80,6 +82,14 @@ class Handler extends ExceptionHandler
 
         if ($exception instanceof MethodNotAllowedHttpException) {
             return $this->errorResponse('El metodo especificado en la peticion no es valido', 405);
+        }
+
+        if ($exception instanceof PermissionDoesNotExist) {
+            return $this->errorResponse('No se encontro el permiso con el nombre especificado', 404);
+        }
+
+        if ($exception instanceof RoleDoesNotExist) {
+            return $this->errorResponse('No se encontro el rol con el nombre especificado', 404);
         }
 
         if ($exception instanceof HttpException) {

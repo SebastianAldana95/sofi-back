@@ -61,6 +61,14 @@ Route::group(['middleware' => 'auth:api'], function () {
      * */
     Route::resource('articles', App\Http\Controllers\Article\ArticleController::class, ['except' => ['create', 'edit']]);
     Route::resource('parentarticles', App\Http\Controllers\Article\ArticleController::class, ['only' => ['index']]);
+    /*
+     *  Resources Permissions
+     * */
+    Route::resource('permissions', App\Http\Controllers\Permission\PermissionController::class, ['only' => ['index']]);
+    /*
+     *  Resources Roles
+     * */
+    Route::resource('roles', App\Http\Controllers\Role\RoleController::class, ['except' => ['create', 'edit']]);
 });
 
 

@@ -32,7 +32,7 @@ class Article extends Model
     }
 
     public function childrenArticles() {
-        return $this->hasMany(Article::class);//->with('parentArticle');
+        return $this->hasMany(Article::class)->with('parentArticle');
     }
 
     public function keywords() {
