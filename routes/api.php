@@ -32,6 +32,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::resource('users.events', App\Http\Controllers\User\UserEventController::class, ['only' => ['index']]);
     Route::resource('users.favorites', App\Http\Controllers\User\UserFavoriteController::class, ['except' => ['create', 'edit', 'show']]);
     Route::resource('users.scores', App\Http\Controllers\User\UserScoreController::class, ['only' => ['store', 'index']]);
+    Route::post('import', [App\Http\Controllers\User\ImportUserController::class, 'import']);
     /*
     *  Roles and Permissions
     * */
