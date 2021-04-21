@@ -53,7 +53,9 @@ class RoleController extends ApiController
         $role->fill($request->all());
 
         if ($request->has('permissions')) {
-            $role->syncPermissions($request->permissions);
+            foreach ($request->permissions as $permission) {
+                $role->givePermissionTo($permission['name']);
+            }
         }
 
         $role->saveOrFail();
