@@ -30,6 +30,7 @@ class UserFactory extends Factory
             'lastname' => 'admin',
             'email' => 'admin@admin.com',
             'user' => 'manual',
+            'state' => 'activo',
             'password' => Hash::make('password12345'),
         ];
     }

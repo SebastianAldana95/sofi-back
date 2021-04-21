@@ -22,7 +22,11 @@ class UserController extends ApiController
     {
         parent::__construct();
 
-        // $this->middleware('role:user')->except(['edit', 'create']);
+        $this->middleware('permission:users.index')->only('index');
+        $this->middleware('permission:users.show')->only('show');
+        $this->middleware('permission:users.store')->only('store');
+        $this->middleware('permission:users.update')->only('update');
+        $this->middleware('permission:users.delete')->only('destroy');
 
     }
 

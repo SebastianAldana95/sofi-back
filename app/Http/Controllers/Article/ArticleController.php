@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Article;
 
-use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Api\ApiController;
 use App\Models\Article;
 use Exception;
 use Illuminate\Http\JsonResponse;

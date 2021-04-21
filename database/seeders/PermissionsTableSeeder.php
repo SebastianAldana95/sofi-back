@@ -44,6 +44,14 @@ class PermissionsTableSeeder extends Seeder
         Permission::create(['name' => 'notifications.update']);
         Permission::create(['name' => 'notifications.delete']);
 
+        // permission List Roles and Permissions
+        Permission::create(['name' => 'roles.index', 'guard_name' => 'api']);
+        Permission::create(['name' => 'roles.show', 'guard_name' => 'api']);
+        Permission::create(['name' => 'roles.store', 'guard_name' => 'api']);
+        Permission::create(['name' => 'roles.update', 'guard_name' => 'api']);
+        Permission::create(['name' => 'roles.delete', 'guard_name' => 'api']);
+        Permission::create(['name' => 'permissions.index', 'guard_name' => 'api']);
+
 
         //Roles
 

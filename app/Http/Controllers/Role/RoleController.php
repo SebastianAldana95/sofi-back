@@ -3,17 +3,24 @@
 namespace App\Http\Controllers\Role;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
 use App\Http\Resources\RoleResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends ApiController
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->middleware('permission:roles.index')->only('index');
+        $this->middleware('permission:roles.store')->only('store');
+        $this->middleware('permission:roles.show')->only('show');
+        $this->middleware('permission:roles.update')->only('update');
+        $this->middleware('permission:roles.delete')->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -44,11 +51,12 @@ class RoleController extends ApiController
     {
         $role = new Role;
         $role->fill($request->all());
-        $role->saveOrFail();
 
         if ($request->has('permissions')) {
-            $role->givePermissionTo($request->permissions);
+            $role->syncPermissions($request->permissions);
         }
+
+        $role->saveOrFail();
 
         return $this->api_success([
             'data' => new RoleResource($role->load(['permissions'])),
@@ -65,7 +73,7 @@ class RoleController extends ApiController
      */
     public function show(Role $role): JsonResponse
     {
-        $role->permissions;
+        $role->load('permissions');
         return $this->singleResponse(new RoleResource($role));
     }
 
@@ -94,13 +102,7 @@ class RoleController extends ApiController
         }
 
         if ($request->has('permissions')) {
-            $role->givePermissionTo($request->permissions);
-        }
-
-        if (!$role->isDirty()) {
-            return $this->errorResponse(
-                'Se debe especificar al menos un valor diferente para actualizar',
-            );
+            $role->syncPermissions($request->permissions);
         }
 
         $role->saveOrFail();

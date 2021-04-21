@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,24 +14,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
 
 Route::group(['middleware' => 'auth:api'], function () {
+
     /*
      *  Auth User
      * */
-    Route::get('/logout', [LoginController::class, 'logout']);
+    Route::get('logout', [App\Http\Controllers\Auth\LoginController::class, 'logout']);
     Route::get('user', function (Request $request) {
         return $request->user()->load(['roles', 'favorites']);
     });
     /*
      *  Users
      * */
-
     Route::resource('users', App\Http\Controllers\User\UserController::class, ['except' => ['create', 'edit']]);
     Route::resource('users.events', App\Http\Controllers\User\UserEventController::class, ['only' => ['index']]);
     Route::resource('users.favorites', App\Http\Controllers\User\UserFavoriteController::class, ['except' => ['create', 'edit', 'show']]);
     Route::resource('users.scores', App\Http\Controllers\User\UserScoreController::class, ['only' => ['store', 'index']]);
+    /*
+    *  Roles and Permissions
+    * */
+    Route::resource('permissions', App\Http\Controllers\Permission\PermissionController::class, ['except' => ['create', 'edit']]);
+    Route::resource('roles', App\Http\Controllers\Role\RoleController::class, ['except' => ['create', 'edit']]);
     /*
      *  Events
      * */
@@ -61,14 +65,7 @@ Route::group(['middleware' => 'auth:api'], function () {
      * */
     Route::resource('articles', App\Http\Controllers\Article\ArticleController::class, ['except' => ['create', 'edit']]);
     Route::resource('parentarticles', App\Http\Controllers\Article\ArticleController::class, ['only' => ['index']]);
-    /*
-     *  Resources Permissions
-     * */
-    Route::resource('permissions', App\Http\Controllers\Permission\PermissionController::class, ['only' => ['index']]);
-    /*
-     *  Resources Roles
-     * */
-    Route::resource('roles', App\Http\Controllers\Role\RoleController::class, ['except' => ['create', 'edit']]);
+
 });
 
 

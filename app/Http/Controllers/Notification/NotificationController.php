@@ -13,6 +13,16 @@ use Throwable;
 
 class NotificationController extends ApiController
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->middleware('permission:notifications.index')->only('index');
+        $this->middleware('permission:notifications.store')->only('store');
+        $this->middleware('permission:notifications.show')->only('show');
+        $this->middleware('permission:notifications.update')->only('update');
+        $this->middleware('permission:notifications.delete')->only('destroy');
+    }
+
     /**
      * Display a listing of the resource.
      *

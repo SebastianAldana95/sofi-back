@@ -11,6 +11,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -90,6 +91,10 @@ class Handler extends ExceptionHandler
 
         if ($exception instanceof RoleDoesNotExist) {
             return $this->errorResponse('No se encontro el rol con el nombre especificado', 404);
+        }
+
+        if ($exception instanceof UnauthorizedException) {
+            return $this->errorResponse('Usuario no tiene permisos para realizar esta accion.', 403);
         }
 
         if ($exception instanceof HttpException) {

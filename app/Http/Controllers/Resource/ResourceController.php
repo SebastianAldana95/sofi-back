@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Resource;
 
-use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Api\ApiController;
 use App\Models\Article;
 use App\Models\Resource;
 use Exception;

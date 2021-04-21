@@ -68,6 +68,17 @@ class User extends Authenticatable implements LdapAuthenticatable
 
     protected $guard_name = 'api';
 
+    public function setStateAttribute($value)
+    {
+        if ($value == 1) {
+            $this->attributes['state'] = 'activo';
+        } elseif ($value == 2) {
+            $this->attributes['state'] = 'inactivo';
+        } elseif ($value == 0) {
+            $this->attributes['state'] = 'pendiente';
+        }
+    }
+
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::make($value);

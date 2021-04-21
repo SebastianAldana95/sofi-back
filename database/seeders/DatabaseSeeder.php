@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Article;
-use App\Models\Event;
-use App\Models\Keyword;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,8 +16,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(UserSeeder::class);
-        $this->call(PermissionsTableSeeder::class);
+        // $this->call(UserSeeder::class);
+        // $this->call(PermissionsTableSeeder::class);
+
+        Permission::create(['name' => 'users.events.index', 'guard_name' => 'api']);
+
+        $admin = Role::where('name', 'Admin')->get()->first();
+        $user = Role::where('name', 'User')->get()->first();
+
+        $admin->givePermissionTo(Permission::all());
+        $user->givePermissionTo('users.events.index');
 
     }
 }

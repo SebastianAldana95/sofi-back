@@ -23,7 +23,11 @@ class EventController extends ApiController
     public function __construct()
     {
         parent::__construct();
-
+        $this->middleware('permission:events.index')->only('index');
+        $this->middleware('permission:events.store')->only('store');
+        $this->middleware('permission:events.show')->only('show');
+        $this->middleware('permission:events.update')->only('update');
+        $this->middleware('permission:events.delete')->only('destroy');
     }
     /**
      * Display a listing of the resource.
@@ -95,7 +99,7 @@ class EventController extends ApiController
      */
     public function show(Event $event): JsonResponse
     {
-        $event->resources;
+        $event->load(['resources','notifications']);
         return $this->singleResponse(new EventResources($event));
     }
 

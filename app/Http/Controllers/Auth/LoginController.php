@@ -85,6 +85,7 @@ class LoginController extends Controller
                 return response()->json(["error" => "Las credenciales proporcionadas no fueron encontradas"], 401);
             }
             $user = Auth::user();
+            $user->syncRoles('User');
             $tokenResult = $user->createToken('sofiApp');
             $token = $tokenResult->token;
             $token->save();

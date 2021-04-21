@@ -4,7 +4,7 @@ return [
 
 
     'defaults' => [
-        'guard' => 'api',
+        'guard' => 'web',
         'passwords' => 'users',
     ],
 
@@ -27,14 +27,10 @@ return [
         'users' => [
             'driver' => 'ldap',
             'model' => LdapRecord\Models\ActiveDirectory\User::class,
-            'rules' => [
-                // App\Ldap\Rules\OnlyAdministrators::class,
-            ],
             'database' => [
                 'model' => App\Models\User::class,
                 'sync_passwords' => true,
                 'sync_attributes' => [
-                    //App\Ldap\AttributeHandler::class,
                     'identification' => 'description',
                     'username' => 'sAMAccountName',
                     'name' => 'givenName',

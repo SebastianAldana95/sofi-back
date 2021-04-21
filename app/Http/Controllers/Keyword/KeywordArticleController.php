@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Keyword;
 
-use App\Http\Controllers\ApiController;
+use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Controller;
 use App\Models\Keyword;
 use Illuminate\Http\JsonResponse;
