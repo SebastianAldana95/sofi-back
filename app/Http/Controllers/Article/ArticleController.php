@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Article;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Requests\StoreArticleRequest;
+use App\Http\Requests\UpdateArticleRequest;
+use App\Http\Resources\ArticleResource;
 use App\Models\Article;
+use App\Models\Resource;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class ArticleController extends ApiController
 {
@@ -18,35 +21,19 @@ class ArticleController extends ApiController
      */
     public function index(): JsonResponse
     {
-        $articles = Article::query()
-            ->where('visibility', '=', '1')
-            ->latest('date')
-            ->with('resources', 'keywords')
-            ->get();
-        return $this->showAll($articles);
+        return $this->collectionResponse(ArticleResource::collection($this->getModel(new Article, ['resources', 'keywords', 'scores'])));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param StoreArticleRequest $request
      * @return JsonResponse
-     * @throws ValidationException
+     * @throws Throwable
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreArticleRequest $request): JsonResponse
     {
-        $validations = [
-            'date' => 'required|date',
-            'title' => 'required|string',
-            'extract' => 'required|string',
-            'content' => 'required|string',
-            'state' => 'required|string',
-            'type' => 'required|string',
-            'article_id' => 'integer',
-        ];
-
-        $this->validate($request, $validations);
-        $article = new Article();
+        $article = new Article;
         $article->fill($request->all());
         $article->saveOrFail();
 
@@ -54,8 +41,21 @@ class ArticleController extends ApiController
             $article->keywords()->sync($request->keywords);
         }
 
-        $article->keywords;
-        return $this->showOne($article, 201);
+        if ($request->has('resources')) {
+            foreach ($request->resources as $resource) {
+                $resourceArticle = new Resource;
+                $resourceArticle->details = $resource['details'];
+                $resourceArticle->url = $resource['url']->store('articles', 'article');
+                $resourceArticle->article_id = $article->id;
+                $resourceArticle->save();
+            }
+        }
+
+        return $this->api_success([
+            'data' => new ArticleResource($article->load(['keywords', 'resources'])),
+            'message' => __('pages.responses.created'),
+            'code' => 201
+        ], 201);
 
     }
 
@@ -67,37 +67,62 @@ class ArticleController extends ApiController
      */
     public function show(Article $article): JsonResponse
     {
-        $article->resources;
-        $article->keywords;
-        return $this->showOne($article);
+        $article->load(['keywords','resources', 'scores']);
+        return $this->singleResponse(new ArticleResource($article));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
+     * @param UpdateArticleRequest $request
      * @param Article $article
      * @return JsonResponse
+     * @throws Throwable
      */
-    public function update(Request $request, Article $article): JsonResponse
+    public function update(UpdateArticleRequest $request, Article $article): JsonResponse
     {
-        $article->fill($request->only([
-            'date',
-            'title',
-            'extract',
-            'content',
-            'state',
-            'type',
-            'visibility',
-            'article_id',
-        ]));
+        if ($request->has('date')) {
+            $article->date = $request->date;
+        }
+
+        if ($request->has('title')) {
+            $article->title = $request->title;
+        }
+
+        if ($request->has('extract')) {
+            $article->extract = $request->extract;
+        }
+
+        if ($request->has('content')) {
+            $article->content = $request['content'];
+        }
+
+        if ($request->has('state')) {
+            $article->state = $request->state;
+        }
+
+        if ($request->has('type')) {
+            $article->type = $request->type;
+        }
+
+        if ($request->has('visibility')) {
+            $article->visibility = $request->visibility;
+        }
+
+        if ($request->has('article_id')) {
+            $article->article_id = $request->article_id;
+        }
 
         if ($article->isClean()) {
             return $this->errorResponse('Se debe especificar al menos un valor diferente para actualizar', 422);
         }
 
-        $article->save();
-        return $this->showOne($article);
+        $article->saveOrFail();
+        return $this->api_success([
+            'data'      =>  new ArticleResource($article),
+            'message'   => __('pages.responses.updated'),
+            'code'      =>  200
+        ]);
     }
 
     /**
@@ -110,6 +135,10 @@ class ArticleController extends ApiController
     public function destroy(Article $article): JsonResponse
     {
         $article->delete();
-        return $this->showOne($article);
+        return $this->api_success([
+            'data' => new ArticleResource($article),
+            'message' => __('pages.responses.deleted'),
+            'code' => 200
+        ]);
     }
 }

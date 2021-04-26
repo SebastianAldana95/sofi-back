@@ -65,7 +65,8 @@ Route::group(['middleware' => 'auth:api'], function () {
      *  Articles
      * */
     Route::resource('articles', App\Http\Controllers\Article\ArticleController::class, ['except' => ['create', 'edit']]);
-    Route::resource('parentarticles', App\Http\Controllers\Article\ArticleController::class, ['only' => ['index']]);
+    Route::resource('articles.resources', App\Http\Controllers\Article\ArticleResource::class, ['only' => ['index']]);
+    Route::resource('articles.keywords', App\Http\Controllers\Article\ArticleKeyword::class, ['only' => ['index']]);
 
 });
 

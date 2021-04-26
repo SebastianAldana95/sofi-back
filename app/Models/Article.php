@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Article extends Model
 {
@@ -25,6 +25,12 @@ class Article extends Model
     protected $hidden = [
         'pivot',
     ];
+
+    public function getTotal_ScoreAttribute() {
+        return $this->scores()->sum(DB::raw('qualification'));
+    }
+
+    /* Relationships */
 
     public function parentArticle() {
         return $this->hasMany(Article::class)

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Resources\EventResourceResource;
+use App\Http\Resources\EventResource;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -29,6 +29,6 @@ class UserEventController extends ApiController
             ->where('visibility', '=', 1)
             ->latest();
 
-        return $this->collectionResponse(EventResourceResource::collection($this->getModel(new Event, ['resources', 'notifications'], $events)));
+        return $this->collectionResponse(EventResource::collection($this->getModel(new Event, ['resources', 'notifications'], $events)));
     }
 }

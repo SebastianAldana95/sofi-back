@@ -24,7 +24,8 @@ class UpdatePermissionRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name' => 'string|unique:permissions',
+            'description' => 'string'
         ];
     }
 }

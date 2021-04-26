@@ -14,7 +14,7 @@ class ImportUserController extends ApiController
     {
         Excel::import(new UserImport, $request->file('file'));
         return $this->api_success([
-           'message' => 'Archivos importados correctamente!',
+           'message' => 'Usuarios importados correctamente!',
            'code' => 200,
         ]);
     }

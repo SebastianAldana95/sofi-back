@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Resource;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Requests\StoreResourceRequest;
+use App\Http\Requests\UpdateResourceArticleRequest;
+use App\Http\Resources\ArticleResource;
+use App\Http\Resources\ResourceArticleResource;
 use App\Models\Article;
 use App\Models\Resource;
 use Exception;
@@ -10,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class ResourceController extends ApiController
 {
@@ -18,33 +23,30 @@ class ResourceController extends ApiController
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $resources = Resource::all();
-        return $this->showAll($resources);
+        return $this->collectionResponse(ResourceArticleResource::collection($this->getModel(new Resource, ['articles'])));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param StoreResourceRequest $request
      * @return JsonResponse
-     * @throws ValidationException
+     * @throws Throwable
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreResourceRequest $request): JsonResponse
     {
-        $validations = [
-            'details' => 'required',
-            'url' => 'required|file',
-            'article_id' => 'required|integer',
-        ];
-
-        $this->validate($request, $validations);
-        $resource = $request->all();
+        $resource = new Resource;
+        $resource->fill($request->all());
+        $resource->saveOrFail();
         $resource['url'] = $request->url->store('articles', 'article');
 
-        $resource = Resource::query()->create($resource);
-        return $this->showOne($resource, 201);
+        return $this->api_success([
+            'data' => new ResourceArticleResource($resource),
+            'message' => __('pages.responses.created'),
+            'code' => 201
+        ], 201);
     }
 
     /**
@@ -55,7 +57,7 @@ class ResourceController extends ApiController
      */
     public function show(Resource $resource): JsonResponse
     {
-        return $this->showOne($resource);
+        return $this->singleResponse(new ResourceArticleResource($resource));
     }
 
     /**
@@ -65,13 +67,8 @@ class ResourceController extends ApiController
      * @param Resource $resource
      * @return JsonResponse
      */
-    public function update(Request $request, Resource $resource): JsonResponse
+    public function update(UpdateResourceArticleRequest $request, Resource $resource): JsonResponse
     {
-        $resource->fill($request->only([
-            'details',
-            'url',
-            'article_id',
-        ]));
 
         if ($request->hasFile('url')) {
             Storage::disk('article')->delete($resource->url);
@@ -83,7 +80,11 @@ class ResourceController extends ApiController
         }
 
         $resource->save();
-        return $this->showOne($resource);
+        return $this->api_success([
+            'data'      =>  new ResourceArticleResource($resource),
+            'message'   => __('pages.responses.updated'),
+            'code'      =>  200
+        ]);
     }
 
     /**
@@ -97,6 +98,10 @@ class ResourceController extends ApiController
     {
         Storage::disk('article')->delete($resource->url);
         $resource->delete();
-        return $this->showOne($resource);
+        return $this->api_success([
+            'data' => new ResourceArticleResource($resource),
+            'message' => __('pages.responses.deleted'),
+            'code' => 200
+        ]);
     }
 }

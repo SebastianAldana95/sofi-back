@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Controllers\Controller;
+use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class UserFavoriteController extends ApiController
 {
@@ -20,8 +19,10 @@ class UserFavoriteController extends ApiController
      */
     public function index(User $user): JsonResponse
     {
-        $articles = $user->favorites;
-        return $this->showAll($articles);
+        $articles = $user->favorites()->with(['resources', 'keywords', 'childrenArticles'])
+            ->where('visibility', '=', 1)
+            ->latest();
+        return $this->collectionResponse(ArticleResource::collection($this->getModel(new Article, ['resources', 'keywords', 'childrenArticles'], $articles)));
     }
 
     /**

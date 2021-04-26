@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Keyword;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Controllers\Controller;
+use App\Http\Resources\ArticleResource;
+use App\Models\Article;
 use App\Models\Keyword;
 use Illuminate\Http\JsonResponse;
 
@@ -17,8 +18,8 @@ class KeywordArticleController extends ApiController
      */
     public function index(Keyword $keyword): JsonResponse
     {
-        $keyword->articles;
-        return $this->showOne($keyword);
+        $articles = $keyword->articles();
+        return $this->collectionResponse(ArticleResource::collection($this->getModel(new Article, [], $articles)));
     }
 
 }

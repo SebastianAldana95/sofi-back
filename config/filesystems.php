@@ -44,7 +44,7 @@ return [
 
         'photo' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/'),
+            'root' => storage_path('app/public/photos'),
             'visibility' => 'public',
         ],
 
@@ -56,7 +56,7 @@ return [
 
         'article' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/'),
+            'root' => storage_path('app/public/articles'),
             'visibility' => 'public',
         ],
 

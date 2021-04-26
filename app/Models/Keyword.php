@@ -25,4 +25,9 @@ class Keyword extends Model
 
     }
 
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = strtolower($value);
+    }
+
 }

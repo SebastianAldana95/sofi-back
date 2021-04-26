@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Keyword;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Requests\StoreKeywordRequest;
+use App\Http\Requests\UpdateKeywordRequest;
+use App\Http\Resources\KeywordResources;
 use App\Models\Keyword;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class KeywordController extends ApiController
 {
@@ -18,25 +22,28 @@ class KeywordController extends ApiController
      */
     public function index(): JsonResponse
     {
-        $keywords = Keyword::all();
-        return $this->showAll($keywords);
+        return $this->collectionResponse(KeywordResources::collection($this->getModel(new Keyword, ['articles'])));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param StoreKeywordRequest $request
      * @return JsonResponse
-     * @throws ValidationException
+     * @throws Throwable
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreKeywordRequest $request): JsonResponse
     {
-        $validations = [
-            'name' => 'required|string',
-        ];
-        $this->validate($request, $validations);
-        $keyword = Keyword::query()->create($request->all());
-        return $this->showOne($keyword, 201);
+
+        $keyword = new Keyword;
+        $keyword->fill($request->all());
+        $keyword->saveOrFail();
+
+        return $this->api_success([
+            'data' => new KeywordResources($keyword),
+            'message' => __('pages.responses.created'),
+            'code' => 201,
+        ], 201);
 
     }
 
@@ -48,27 +55,32 @@ class KeywordController extends ApiController
      */
     public function show(Keyword $keyword): JsonResponse
     {
-        return $this->showOne($keyword);
+        return $this->singleResponse(new KeywordResources($keyword));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
+     * @param UpdateKeywordRequest $request
      * @param Keyword $keyword
      * @return JsonResponse
+     * @throws Throwable
      */
-    public function update(Request $request, Keyword $keyword): JsonResponse
+    public function update(UpdateKeywordRequest $request, Keyword $keyword): JsonResponse
     {
-        $keyword->fill($request->only([
-            'name',
-        ]));
+        if ($request->has('name')) {
+            $keyword->name = $request->name;
+        }
 
         if ($keyword->isClean()) {
             return $this->errorResponse('Se debe especificar al menos un valor diferente para actualizar');
         }
-        $keyword->save();
-        return $this->showOne($keyword);
+        $keyword->saveOrFail();
+        return $this->api_success([
+            'data'      =>  new KeywordResources($keyword),
+            'message'   => __('pages.responses.updated'),
+            'code'      =>  200
+        ]);
     }
 
     /**
@@ -81,6 +93,10 @@ class KeywordController extends ApiController
     public function destroy(Keyword $keyword): JsonResponse
     {
         $keyword->delete();
-        return $this->showOne($keyword);
+        return $this->api_success([
+            'data' => new KeywordResources($keyword),
+            'message' => __('pages.responses.deleted'),
+            'code' => 200
+        ]);
     }
 }

@@ -103,6 +103,10 @@ class RoleController extends ApiController
             $role->name = $request->name;
         }
 
+        if ($request->has('description')) {
+            $role->description = $request->description;
+        }
+
         if ($request->has('permissions')) {
             $role->syncPermissions($request->permissions);
         }

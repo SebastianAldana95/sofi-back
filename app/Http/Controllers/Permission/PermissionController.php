@@ -100,6 +100,10 @@ class PermissionController extends ApiController
             $permission->name = $request->name;
         }
 
+        if ($request->has('description')) {
+            $permission->description = $request->description;
+        }
+
         if (!$permission->isDirty()) {
             return $this->errorResponse(
                 'Se debe especificar al menos un valor diferente para actualizar',

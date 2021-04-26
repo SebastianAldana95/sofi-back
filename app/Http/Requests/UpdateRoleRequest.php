@@ -24,7 +24,8 @@ class UpdateRoleRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'unique:roles'
+            'name' => 'unique:roles',
+            'description' => 'string'
         ];
     }
 }

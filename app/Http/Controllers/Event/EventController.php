@@ -12,10 +12,9 @@ use App\Models\Notification;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class EventController extends ApiController
 {
@@ -42,9 +41,9 @@ class EventController extends ApiController
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
+     * @param StoreEventRequest $request
      * @return JsonResponse
-     * @throws ValidationException
+     * @throws Throwable
      */
     public function store(StoreEventRequest $request): JsonResponse
     {
@@ -107,10 +106,10 @@ class EventController extends ApiController
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
+     * @param UpdateEventRequest $request
      * @param Event $event
      * @return JsonResponse
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function update(UpdateEventRequest $request, Event $event): JsonResponse
     {

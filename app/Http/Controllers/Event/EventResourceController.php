@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Event;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Resources\EventResourceResource;
 use App\Models\Event;
 use App\Models\EventResource;
+use App\Http\Resources\EventResource as EventResourcesResources;
 use Illuminate\Http\JsonResponse;
 
 class EventResourceController extends ApiController
@@ -19,7 +19,7 @@ class EventResourceController extends ApiController
     public function index(Event $event): JsonResponse
     {
         $resources = $event->resources();
-        return $this->collectionResponse(EventResourceResource::collection($this->getModel(new EventResource, [], $resources)));
+        return $this->collectionResponse(EventResourcesResources::collection($this->getModel(new EventResource, [], $resources)));
     }
 
 }
