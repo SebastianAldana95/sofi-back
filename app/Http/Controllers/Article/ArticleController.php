@@ -10,6 +10,8 @@ use App\Models\Article;
 use App\Models\Resource;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Throwable;
 
 class ArticleController extends ApiController
@@ -21,7 +23,7 @@ class ArticleController extends ApiController
      */
     public function index(): JsonResponse
     {
-        return $this->collectionResponse(ArticleResource::collection($this->getModel(new Article, ['resources', 'keywords', 'scores'])));
+        return $this->collectionResponse(ArticleResource::collection($this->getModel(new Article, ['resources'])));
     }
 
     /**
@@ -43,11 +45,32 @@ class ArticleController extends ApiController
 
         if ($request->has('resources')) {
             foreach ($request->resources as $resource) {
-                $resourceArticle = new Resource;
-                $resourceArticle->details = $resource['details'];
-                $resourceArticle->url = $resource['url']->store('articles', 'article');
-                $resourceArticle->article_id = $article->id;
-                $resourceArticle->save();
+                if ($resource['details'] === 'imagen') {
+                    $resourceArticle = new Resource;
+                    $image_64 = $resource['url'];
+                    $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];
+                    $image = str_replace('data:image/jpeg;base64,', '', $image_64);
+                    $image = str_replace(' ', '+', $image);
+                    $imageName = Str::random(10).'.'.$extension;
+                    Storage::disk('article')->put($imageName, base64_decode($image));
+                    $resourceArticle->details = $resource['details'];
+                    $resourceArticle->url = $imageName;
+                    $resourceArticle->article_id = $article->id;
+                    $resourceArticle->save();
+                } elseif ($resource['details'] === 'video') {
+                    $resourceArticle = new Resource;
+                    $image_64 = $resource['url'];
+                    $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];
+                    $image = str_replace('data:video/mp4;base64,', '', $image_64);
+                    $image = str_replace(' ', '+', $image);
+                    $imageName = Str::random(10).'.'.$extension;
+                    Storage::disk('article')->put($imageName, base64_decode($image));
+                    $resourceArticle->details = $resource['details'];
+                    $resourceArticle->url = $imageName;
+                    $resourceArticle->article_id = $article->id;
+                    $resourceArticle->save();
+                }
+
             }
         }
 
@@ -111,6 +134,10 @@ class ArticleController extends ApiController
 
         if ($request->has('article_id')) {
             $article->article_id = $request->article_id;
+        }
+
+        if ($request->has('keywords')) {
+            $article->keywords()->sync($request->keywords);
         }
 
         if ($article->isClean()) {

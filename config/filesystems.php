@@ -44,20 +44,19 @@ return [
 
         'photo' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/photos'),
+            'root' => storage_path('app/public'),
             'visibility' => 'public',
         ],
 
         'event' => [
             'driver' => 'local',
-            'root' => storage_path('app/public/events'),
+            'root' => storage_path('app/public'),
             'visibility' => 'public',
         ],
 
         'article' => [
             'driver' => 'local',
             'root' => storage_path('app/public/articles'),
-            'visibility' => 'public',
         ],
 
         's3' => [

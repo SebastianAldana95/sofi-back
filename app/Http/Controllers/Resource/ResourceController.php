@@ -39,9 +39,10 @@ class ResourceController extends ApiController
     {
         $resource = new Resource;
         $resource->fill($request->all());
+        if ($request->has('url')) {
+            $resource->url = $request->file('url')->store('articles', 'article');
+        }
         $resource->saveOrFail();
-        $resource['url'] = $request->url->store('articles', 'article');
-
         return $this->api_success([
             'data' => new ResourceArticleResource($resource),
             'message' => __('pages.responses.created'),
