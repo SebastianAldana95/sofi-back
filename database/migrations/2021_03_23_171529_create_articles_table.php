@@ -20,7 +20,7 @@ class CreateArticlesTable extends Migration
             $table->date('date');
             $table->string('title', 50);
             $table->mediumText('extract');
-            $table->text('content');
+            $table->longText('content');
             $table->string('state', 10);
             $table->string('type', 20);
             $table->boolean('visibility')->default(1);
