@@ -1,2 +1,2 @@
 <?
-echo hola;
+echo 'hola';
