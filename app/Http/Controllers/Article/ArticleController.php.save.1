@@ -23,17 +23,7 @@ class ArticleController extends ApiController
      */
     public function index(): JsonResponse
     {
-        return $this->collectionResponse(ArticleResource::collection($this->getModel(new Article, ['keywords','resources'],Article::with('keywords','resources')->select(
-'id',
-'article_id',
-'date',
-'title',
-'extract',
-'state',
-'type',
-'visibility',
-'total_score'
-        ))));
+        return $this->collectionResponse(ArticleResource::collection($this->getModel(new Article, ['keywords'])));
     }
 
     /**

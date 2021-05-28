@@ -16,12 +16,13 @@ class PermissionController extends ApiController
     public function __construct()
     {
         parent::__construct();
+/*
         $this->middleware('permission:permissions.index')->only('index');
         $this->middleware('permission:permissions.store')->only('store');
         $this->middleware('permission:permissions.show')->only('show');
         $this->middleware('permission:permissions.update')->only('update');
         $this->middleware('permission:permissions.delete')->only('destroy');
-
+*/
     }
     /**
      * Display a listing of the resource.

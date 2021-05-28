@@ -16,8 +16,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UserSeeder::class);
-        // $this->call(PermissionsTableSeeder::class);
+         $this->call(UserSeeder::class);
+       $this->call(PermissionsTableSeeder::class);
 
         Permission::create(['name' => 'users.events.index', 'guard_name' => 'api']);
 

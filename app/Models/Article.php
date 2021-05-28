@@ -13,6 +13,7 @@ class Article extends Model
     protected $fillable = [
         'date',
         'title',
+	'author',
         'extract',
         'content',
         'state',
@@ -20,6 +21,8 @@ class Article extends Model
         'visibility',
         'total_score',
         'article_id',
+	'primary_image'
+
     ];
 
     protected $hidden = [
@@ -46,7 +49,7 @@ class Article extends Model
     }
 
     public function resources() {
-        return $this->hasMany('\App\Models\Resource');
+         return $this->hasMany('\App\Models\Resource');
     }
 
     public function favorites() {

@@ -17,7 +17,9 @@ class PermissionsTableSeeder extends Seeder
     public function run()
     {
         // permission List Users
-        Permission::create(['name' => 'users.index']);
+      
+
+Permission::create(['name' => 'users.index', 'guard_name' => 'api']);
         Permission::create(['name' => 'users.store']);
         Permission::create(['name' => 'users.show']);
         Permission::create(['name' => 'users.update']);
@@ -43,6 +45,7 @@ class PermissionsTableSeeder extends Seeder
         Permission::create(['name' => 'notifications.show']);
         Permission::create(['name' => 'notifications.update']);
         Permission::create(['name' => 'notifications.delete']);
+        
 
         // permission List Roles and Permissions
         Permission::create(['name' => 'roles.index', 'guard_name' => 'api']);
@@ -57,6 +60,7 @@ class PermissionsTableSeeder extends Seeder
 
         $admin = Role::create([
             'name' => 'Admin',
+'guard_name'=>'api',
         ]);
 
         $admin->givePermissionTo(Permission::all());

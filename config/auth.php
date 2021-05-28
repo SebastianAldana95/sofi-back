@@ -4,21 +4,21 @@ return [
 
 
     'defaults' => [
-        'guard' => 'web',
+        'guard' => 'api',
         'passwords' => 'users',
     ],
 
     'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
 
-        'api' => [
+'api' => [
             'driver' => 'passport',
             'provider' => 'users',
             'hash' => false,
         ],
+        'web' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ]
     ],
 
 

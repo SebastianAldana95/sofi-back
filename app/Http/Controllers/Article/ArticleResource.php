@@ -19,8 +19,8 @@ class ArticleResource extends ApiController
      */
     public function index(Article $article): JsonResponse
     {
-        $resources = $article->resources();
-        return $this->collectionResponse(ResourceArticleResource::collection($this->getModel(new Resource, [], $resources)));
+       // $resources = $article->resources();
+       // return $this->collectionResponse(ResourceArticleResource::collection($this->getModel(new Resource, [], $resources)));
     }
 
     /**

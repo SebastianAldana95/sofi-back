@@ -76,7 +76,7 @@ class EventController extends ApiController
                 $image = str_replace(' ', '+', $image);
                 $imageName = Str::random(10).'.'.$extension;
                 Storage::disk('event')->put($imageName, base64_decode($image));
-                $resourceEvent->url = $imageName;
+                $resourceEvent->url = $image_64;
                 $resourceEvent->event_id = $event->id;
                 $resourceEvent->save();
             }
@@ -169,5 +169,16 @@ class EventController extends ApiController
             'message' => __('pages.responses.deleted'),
             'code' => 200
         ]);
+    }
+
+    public function list_public (){
+
+        $events = Event::with('resources')->where('state','public')->get();
+        return $this->api_success([
+            'data' => $events,
+            'message' => 'lista',
+            'code' => 200
+        ]);
+
     }
 }

@@ -240,4 +240,21 @@ class UserController extends ApiController
         $user->save();
         return $this->singleResponse(new UserResource($user));
     }
+    
+    /**
+     * update photo in the table users.
+     *
+     * @param User $user
+     * @return JsonResponse
+     */
+    public function update_photo(UpdateUserRequest $request ,User $user): JsonResponse
+    {
+
+        if ($request->has('photo')) {
+            Storage::disk('photo')->delete($user->photo);
+            $user->photo = $request->photo->store('photos', 'photo');
+        }
+        return $this->singleResponse(new UserResource($user));
+    }
+
 }

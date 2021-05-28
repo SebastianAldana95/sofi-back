@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
-
+Route::get('events/public', [App\Http\Controllers\Event\EventController::class,'list_public']);
+Route::get('articles/public', [App\Http\Controllers\Article\ArticleController::class,'list_public']);
 Route::group(['middleware' => 'auth:api'], function () {
 
     /*
@@ -33,6 +34,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::resource('users.favorites', App\Http\Controllers\User\UserFavoriteController::class, ['except' => ['create', 'edit', 'show']]);
     Route::resource('users.scores', App\Http\Controllers\User\UserScoreController::class, ['only' => ['store', 'index']]);
     Route::post('import', [App\Http\Controllers\User\ImportUserController::class, 'import']);
+    Route::post('user/update/photo', [App\Http\Controllers\User\UserController::class,'update_photo']);
     /*
     *  Roles and Permissions
     * */
@@ -67,6 +69,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::resource('articles', App\Http\Controllers\Article\ArticleController::class, ['except' => ['create', 'edit']]);
     Route::resource('articles.resources', App\Http\Controllers\Article\ArticleResource::class, ['only' => ['index']]);
     Route::resource('articles.keywords', App\Http\Controllers\Article\ArticleKeyword::class, ['only' => ['index']]);
+    Route::get('articles/type/{type}', [App\Http\Controllers\Article\ArticleController::class,'list_type']);
 
 });
 

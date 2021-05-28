@@ -28,6 +28,7 @@ class StoreArticleRequest extends FormRequest
             'title' => 'required|string',
             'extract' => 'required|string',
             'content' => 'required|string',
+            'author'=> 'required|string',
             'state' => 'required|string',
             'type' => 'required|string',
             'article_id' => 'integer',
