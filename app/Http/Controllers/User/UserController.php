@@ -13,6 +13,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Throwable;
+use App\Mail\UserRegisteredMailable;
+use Illuminate\Support\Facades\Mail;
 
 
 class UserController extends ApiController
@@ -55,9 +57,10 @@ class UserController extends ApiController
         $user->state = 'pendiente';
         $user->syncRoles('User');
         $user->saveOrFail();
-
+	
         // Mail de bienvenida!
-
+	$userRegisteredMail = new UserRegisteredMailable($user->id);
+        Mail::to($user->email)->send($userRegisteredMail);
         return $this->api_success([
             'data' => new UserResource($user),
             'message' => __('pages.responses.created'),
@@ -250,11 +253,20 @@ class UserController extends ApiController
     public function update_photo(UpdateUserRequest $request ,User $user): JsonResponse
     {
 
-        if ($request->has('photo')) {
-            Storage::disk('photo')->delete($user->photo);
-            $user->photo = $request->photo->store('photos', 'photo');
-        }
-        return $this->singleResponse(new UserResource($user));
+//dd( auth()->guard('api')->user()->id);
+            if ($request->has('photo')) {
+   $user_update = auth()->guard('api')->user();
+                Storage::disk('photo')->delete($user_update->photo);
+                $user_update->photo = $request->photo->store('photos', 'photo');
+            }
+        
+$user_update->save();
+//dd(2);        
+ return $this->api_success([
+            'data'	=>  $user_update,
+            'message'   => 'Foto actualizada',
+            'code'	=>  200
+        ]);
     }
 
 }

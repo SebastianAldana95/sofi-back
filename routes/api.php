@@ -14,9 +14,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::post('sendUserRegisteredMail', [App\Http\Controllers\Auth\LoginController::class, 'sendUserRegisteredMail']);
+Route::post('sendLogInMail', [App\Http\Controllers\Auth\LoginController::class, 'sendLogInMail']);
+Route::post('sendForgotPasswordMail', [App\Http\Controllers\Auth\LoginController::class, 'sendForgotPasswordMail']);
+Route::post('addFavoriteArticlesToUser', [App\Http\Controllers\Auth\LoginController::class, 'addFavoriteArticlesToUser']);
+Route::post('getFavoriteArticlesByUser', [App\Http\Controllers\Auth\LoginController::class, 'getFavoriteArticlesByUser']);
+Route::post('getUsersByFavoriteArticle', [App\Http\Controllers\Auth\LoginController::class, 'getUsersByFavoriteArticle']);
+Route::post('addScoreToArticles', [App\Http\Controllers\Auth\LoginController::class, 'addScoreToArticles']);
+Route::post('getScoresByUser', [App\Http\Controllers\Auth\LoginController::class, 'getScoresByUser']);
+Route::post('getScoresByArticle', [App\Http\Controllers\Auth\LoginController::class, 'getScoresByArticle']);
+Route::post('getFutureEvents', [App\Http\Controllers\Auth\LoginController::class, 'getFutureEvents']);
+Route::post('getFutureEventsByState', [App\Http\Controllers\Auth\LoginController::class, 'getFutureEventsByState']);
+Route::post('getFutureEventsByUser', [App\Http\Controllers\Auth\LoginController::class, 'getFutureEventsByUser']);
+Route::post('getFutureEventsByUserAndState', [App\Http\Controllers\Auth\LoginController::class, 'getFutureEventsByUserAndState']);
+Route::post('confirmCodeRestorePassword', [App\Http\Controllers\Auth\LoginController::class, 'confirmCodeRestorePassword']);
+Route::post('saveNewPassword', [App\Http\Controllers\Auth\LoginController::class, 'saveNewPassword']);
+Route::post('removeFavoriteArticlesToUser', [App\Http\Controllers\Auth\LoginController::class, 'removeFavoriteArticlesToUser']);
+Route::post('existFavorite', [App\Http\Controllers\Auth\LoginController::class, 'existFavorite']);
+
 Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
 Route::get('events/public', [App\Http\Controllers\Event\EventController::class,'list_public']);
-Route::get('articles/public', [App\Http\Controllers\Article\ArticleController::class,'list_public']);
+Route::get('articles/public/{type}', [App\Http\Controllers\Article\ArticleController::class,'list_public']);
+Route::get('articles/public/show/{id}', [App\Http\Controllers\Article\ArticleController::class,'show_public']);
 Route::group(['middleware' => 'auth:api'], function () {
 
     /*

@@ -23,7 +23,8 @@ class ArticleController extends ApiController
      */
     public function index(): JsonResponse
     {
-        return $this->collectionResponse(ArticleResource::collection($this->getModel(new Article, ['keywords','resources'],Article::with('keywords','resources')->select(
+
+        return $this->collectionResponse(ArticleResource::collection($this->getModel(new Article, [],Article::with('keywords','resources')->select(
 'id',
 'article_id',
 'date',
@@ -32,7 +33,8 @@ class ArticleController extends ApiController
 'state',
 'type',
 'visibility',
-'total_score'
+'total_score',
+'primary_image'
         ))));
     }
 
@@ -100,7 +102,20 @@ class ArticleController extends ApiController
      */
     public function show(Article $article): JsonResponse
     {
-        $article->load(['keywords','resources', 'scores']);
+        $article->load(['keywords','resources', 'scores','childrenArticles'=>function($query){
+		
+		$query->select('id',
+'article_id',
+'date',
+'title',
+'extract',
+'state',
+'type',
+'visibility',
+'total_score',
+'primary_image');
+	
+	}]);
         return $this->singleResponse(new ArticleResource($article));
     }
 
@@ -191,9 +206,11 @@ class ArticleController extends ApiController
      * @throws Exception
      */
 
-    public function list_public (){
+    public function list_public ($type){
 
-        $articles = Article::select('id','article_id','title','type')->with('keywords')->where('state',0)->get();
+        $articles = Article::select('id','extract','article_id','title','type','primary_image')->with('keywords')
+	->where('type',$type)
+	->where('state',0)->get();
         return $this->api_success([
             'data' => $articles,
             'message' => 'lista de articulos',
@@ -211,12 +228,41 @@ class ArticleController extends ApiController
 
     public function list_type (UpdateArticleRequest $request, $type){
 
-        $articles = Article::select('id','article_id','title','type')->with('keywords')->where('type',$type)->get();
+        $articles = Article::select('id','article_id','extract','title','type','primary_image')->with('keywords')->where('type',$type)->get();
         return $this->api_success([
             'data' => $articles,
             'message' => 'lista de tipos de articulos',
             'code' => 200
         ]);
 
+    }
+/**
+     * Display the specified resource public.
+     *
+     * @param Article $article
+     * @return JsonResponse
+     */
+    public function show_public($id)
+    {  
+ 	$article = Article::with(['keywords','resources', 'scores','childrenArticles'=>function($query){
+
+                $query->select('id',
+'article_id',
+'date',
+'title',
+'extract',
+'state',
+'type',
+'visibility',
+'total_score',
+'primary_image');
+	
+        }])->find($id);
+        return $this->api_success([
+            'data' => $article,
+            'message' => 'articulo consultado correctamente',
+            'code' => 200
+        ]);
+        
     }
 }
